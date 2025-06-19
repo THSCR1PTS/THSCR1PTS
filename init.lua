@@ -1,15 +1,16 @@
--- THSCR1PTS HUB COMPLETO - GUI nativa estilo Rael Hub (preto) com abas e mais de 40 funções
+-- THSCR1PTS HUB COMPLETO - GUI nativa estilo Rael Hub com funções ajustáveis e sujas (sem autofarm e fling)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
-local TweenService = game:GetService("TweenService")
 
--- CONFIGURAÇÃO
-local normalSpeed = 16
-local normalJump = 50
-local normalGravity = workspace.Gravity
+-- Config padrões
+local defaultSpeed = 16
+local defaultJump = 50
+local defaultGravity = workspace.Gravity
+local defaultSpinSpeed = 30
+local defaultKillRadius = 15
 
 -- Criar ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -28,10 +29,10 @@ OpenBtn.TextScaled = true
 OpenBtn.BorderSizePixel = 0
 OpenBtn.AutoButtonColor = false
 
--- Frame principal do HUB
+-- Frame principal
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 460, 0, 520)
-Main.Position = UDim2.new(0.5, -230, 0.5, -260)
+Main.Size = UDim2.new(0, 480, 0, 550)
+Main.Position = UDim2.new(0.5, -240, 0.5, -275)
 Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
 Main.BorderSizePixel = 0
 Main.Visible = false
@@ -39,9 +40,8 @@ Main.ClipsDescendants = true
 Main.Active = true
 Main.Draggable = true
 
--- Título
 local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Size = UDim2.new(1, 0, 0, 50)
 Title.BackgroundColor3 = Color3.fromRGB(10,10,10)
 Title.Text = "THSCR1PTS HUB"
 Title.TextColor3 = Color3.new(1,1,1)
@@ -49,12 +49,11 @@ Title.Font = Enum.Font.GothamBold
 Title.TextScaled = true
 Title.BorderSizePixel = 0
 
--- Botão fechar
 local CloseBtn = Instance.new("TextButton", Main)
 CloseBtn.Size = UDim2.new(0, 40, 0, 40)
-CloseBtn.Position = UDim2.new(1, -45, 0, 2)
+CloseBtn.Position = UDim2.new(1, -50, 0, 5)
 CloseBtn.Text = "X"
-CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
 CloseBtn.TextColor3 = Color3.new(1,1,1)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextScaled = true
@@ -69,38 +68,36 @@ OpenBtn.MouseButton1Click:Connect(function()
     Main.Visible = not Main.Visible
 end)
 
--- Container para abas
+-- Container abas
 local TabsFrame = Instance.new("Frame", Main)
-TabsFrame.Size = UDim2.new(1, -20, 0, 40)
-TabsFrame.Position = UDim2.new(0, 10, 0, 50)
+TabsFrame.Size = UDim2.new(1, -20, 0, 45)
+TabsFrame.Position = UDim2.new(0, 10, 0, 55)
 TabsFrame.BackgroundTransparency = 1
 
 local UIListLayout = Instance.new("UIListLayout", TabsFrame)
 UIListLayout.FillDirection = Enum.FillDirection.Horizontal
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 15)
+UIListLayout.Padding = UDim.new(0, 10)
 
--- Container para conteúdo das abas
 local ContentFrame = Instance.new("Frame", Main)
 ContentFrame.Size = UDim2.new(1, -20, 1, -110)
-ContentFrame.Position = UDim2.new(0, 10, 0, 95)
+ContentFrame.Position = UDim2.new(0, 10, 0, 105)
 ContentFrame.BackgroundTransparency = 1
 ContentFrame.ClipsDescendants = true
 
--- Função para criar abas e conteúdo
+-- Função para criar abas
 local Tabs = {}
 local SelectedTab = nil
-
 local function CreateTab(name)
     local TabBtn = Instance.new("TextButton", TabsFrame)
-    TabBtn.Size = UDim2.new(0, 90, 1, 0)
-    TabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    TabBtn.Size = UDim2.new(0, 110, 1, 0)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
     TabBtn.Text = name
     TabBtn.TextColor3 = Color3.new(1,1,1)
     TabBtn.Font = Enum.Font.GothamBold
     TabBtn.TextScaled = true
-    TabBtn.AutoButtonColor = false
     TabBtn.BorderSizePixel = 0
+    TabBtn.AutoButtonColor = false
     TabBtn.LayoutOrder = #Tabs + 1
 
     local Content = Instance.new("ScrollingFrame", ContentFrame)
@@ -125,15 +122,14 @@ local function CreateTab(name)
     TabBtn.MouseButton1Click:Connect(function()
         if SelectedTab then
             SelectedTab.Content.Visible = false
-            SelectedTab.Button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            SelectedTab.Button.BackgroundColor3 = Color3.fromRGB(30,30,30)
         end
         SelectedTab = Tab
         SelectedTab.Content.Visible = true
-        SelectedTab.Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        SelectedTab.Button.BackgroundColor3 = Color3.fromRGB(60,60,60)
     end)
 
     table.insert(Tabs, Tab)
-
     return Tab
 end
 
@@ -153,43 +149,95 @@ local function AddToggleButton(tab, text, callback)
     btn.TextScaled = true
     btn.BorderSizePixel = 0
     btn.Text = text .. " : OFF"
-
     local enabled = false
-
     btn.MouseButton1Click:Connect(function()
         enabled = not enabled
         btn.Text = text .. (enabled and " : ON" or " : OFF")
         callback(enabled)
-        if enabled then
-            btn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-        else
-            btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-        end
+        btn.BackgroundColor3 = enabled and Color3.fromRGB(0,150,0) or Color3.fromRGB(35,35,35)
     end)
-
     table.insert(tab.Buttons, btn)
     return btn
 end
 
--- Função para criar botões simples (só clicar)
+-- Função para criar botões simples
 local function AddButton(tab, text, callback)
     local btn = Instance.new("TextButton", tab.Content)
     btn.Size = UDim2.new(1, 0, 0, 40)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
     btn.TextColor3 = Color3.new(1,1,1)
     btn.Font = Enum.Font.Gotham
     btn.TextScaled = true
     btn.BorderSizePixel = 0
     btn.Text = text
-
     btn.MouseButton1Click:Connect(callback)
-
     table.insert(tab.Buttons, btn)
     return btn
 end
 
--- --------- FUNÇÕES DO PLAYER ---------
-local humanoid = nil
+-- Função para criar sliders
+local function AddSlider(tab, text, minVal, maxVal, defaultVal, callback)
+    local container = Instance.new("Frame", tab.Content)
+    container.Size = UDim2.new(1, 0, 0, 60)
+    container.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel", container)
+    label.Size = UDim2.new(0.5, 0, 0, 20)
+    label.Position = UDim2.new(0, 5, 0, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.new(1,1,1)
+    label.Font = Enum.Font.Gotham
+    label.TextScaled = true
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Text = text .. ": " .. tostring(defaultVal)
+
+    local sliderFrame = Instance.new("Frame", container)
+    sliderFrame.Size = UDim2.new(0.95, -10, 0, 20)
+    sliderFrame.Position = UDim2.new(0, 5, 0, 30)
+    sliderFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    sliderFrame.BorderSizePixel = 0
+
+    local sliderButton = Instance.new("TextButton", sliderFrame)
+    sliderButton.Size = UDim2.new((defaultVal - minVal)/(maxVal - minVal), 0, 1, 0)
+    sliderButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    sliderButton.BorderSizePixel = 0
+    sliderButton.AutoButtonColor = false
+    sliderButton.Text = ""
+
+    local dragging = false
+
+    local function updateValue(inputPos)
+        local relativeX = math.clamp(inputPos.X - sliderFrame.AbsolutePosition.X, 0, sliderFrame.AbsoluteSize.X)
+        local percent = relativeX / sliderFrame.AbsoluteSize.X
+        local value = math.floor(minVal + (maxVal - minVal) * percent)
+        sliderButton.Size = UDim2.new(percent, 0, 1, 0)
+        label.Text = text .. ": " .. value
+        callback(value)
+    end
+
+    sliderButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+        end
+    end)
+
+    sliderButton.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            updateValue(input.Position)
+        end
+    end)
+
+    return container
+end
+
+-- PLAYER TAB FUNÇÕES
+
 local function getHumanoid()
     if LocalPlayer.Character then
         return LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -197,21 +245,39 @@ local function getHumanoid()
     return nil
 end
 
+local currentSpeed = defaultSpeed
 local speedOn = false
 AddToggleButton(PlayerTab, "Speed Hack", function(state)
     speedOn = state
     local hum = getHumanoid()
     if hum then
-        hum.WalkSpeed = speedOn and 100 or normalSpeed
+        hum.WalkSpeed = speedOn and currentSpeed or defaultSpeed
     end
 end)
 
+AddSlider(PlayerTab, "Speed", 16, 300, defaultSpeed, function(val)
+    currentSpeed = val
+    if speedOn then
+        local hum = getHumanoid()
+        if hum then hum.WalkSpeed = val end
+    end
+end)
+
+local currentJump = defaultJump
 local jumpOn = false
 AddToggleButton(PlayerTab, "Super Jump", function(state)
     jumpOn = state
     local hum = getHumanoid()
     if hum then
-        hum.JumpPower = jumpOn and 150 or normalJump
+        hum.JumpPower = jumpOn and currentJump or defaultJump
+    end
+end)
+
+AddSlider(PlayerTab, "Jump Power", 50, 500, defaultJump, function(val)
+    currentJump = val
+    if jumpOn then
+        local hum = getHumanoid()
+        if hum then hum.JumpPower = val end
     end
 end)
 
@@ -250,13 +316,20 @@ AddToggleButton(PlayerTab, "Infinite Jump", function(state)
     infJumpOn = state
 end)
 
+local currentGravity = defaultGravity
 local gravityOn = false
 AddToggleButton(PlayerTab, "Gravity Toggle", function(state)
     gravityOn = state
-    workspace.Gravity = gravityOn and 0 or normalGravity
+    workspace.Gravity = gravityOn and currentGravity or defaultGravity
 end)
 
--- Anti Ragdoll (simulado, impede o humanoid de entrar em estado de ragdoll ou "dead")
+AddSlider(PlayerTab, "Gravity", 0, 500, defaultGravity, function(val)
+    currentGravity = val
+    if gravityOn then
+        workspace.Gravity = val
+    end
+end)
+
 local antiRagdollOn = false
 AddToggleButton(PlayerTab, "Anti Ragdoll", function(state)
     antiRagdollOn = state
@@ -274,29 +347,38 @@ AddToggleButton(PlayerTab, "Anti Ragdoll", function(state)
     end
 end)
 
--- --------- FUNÇÕES SUJAS ---------
+-- SUJO TAB FUNÇÕES
 
--- Spinbot (faz o personagem girar o torso)
 local spinbotOn = false
 local spinConnection = nil
+local currentSpinSpeed = defaultSpinSpeed
+
 AddToggleButton(SujoTab, "Spinbot", function(state)
     spinbotOn = state
     if spinbotOn then
         spinConnection = RunService.Heartbeat:Connect(function()
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
+                LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(currentSpinSpeed), 0)
             end
         end)
     else
-        if spinConnection then spinConnection:Disconnect() end
+        if spinConnection then spinConnection:Disconnect() spinConnection=nil end
     end
 end)
 
--- Kill Aura (matar todos jogadores próximos)
+AddSlider(SujoTab, "Spinbot Speed", 10, 500, defaultSpinSpeed, function(val)
+    currentSpinSpeed = val
+end)
+
 local killAuraOn = false
-local killRadius = 15 -- distância máxima
+local currentKillRadius = defaultKillRadius
+
 AddToggleButton(SujoTab, "Kill Aura", function(state)
     killAuraOn = state
+end)
+
+AddSlider(SujoTab, "Kill Aura Radius", 5, 100, defaultKillRadius, function(val)
+    currentKillRadius = val
 end)
 
 RunService.Heartbeat:Connect(function()
@@ -304,8 +386,7 @@ RunService.Heartbeat:Connect(function()
         for _, plr in pairs(Players:GetPlayers()) do
             if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("HumanoidRootPart") then
                 local dist = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
-                if dist <= killRadius then
-                    -- Ataque simples simulando dano (exemplo, pois dano real depende do jogo)
+                if dist <= currentKillRadius then
                     local hum = plr.Character.Humanoid
                     if hum and hum.Health > 0 then
                         hum.Health = 0
@@ -316,7 +397,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Rage Aimbot básico (trava no torso mais próximo)
+-- Rage Aimbot básico
 local rageAimbotOn = false
 AddToggleButton(SujoTab, "Rage Aimbot", function(state)
     rageAimbotOn = state
@@ -346,35 +427,13 @@ RunService.Heartbeat:Connect(function()
         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
             local hrp = LocalPlayer.Character.HumanoidRootPart
             local targetPos = target.Character.HumanoidRootPart.Position
-            -- Ajustar o CFrame para olhar no alvo
             hrp.CFrame = CFrame.new(hrp.Position, targetPos)
         end
     end
 end)
 
--- Fling All (empurra os jogadores para fora do mapa)
-local flingOn = false
-AddToggleButton(SujoTab, "Fling All", function(state)
-    flingOn = state
-    if flingOn then
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local targetHRP = plr.Character.HumanoidRootPart
-                local myHRP = LocalPlayer.Character.HumanoidRootPart
-                -- Mover o personagem para tocar o outro e empurrar (fling básico)
-                local bodyVelocity = Instance.new("BodyVelocity")
-                bodyVelocity.Velocity = (targetHRP.Position - myHRP.Position).unit * 150 + Vector3.new(0,50,0)
-                bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                bodyVelocity.Parent = myHRP
-                game.Debris:AddItem(bodyVelocity, 0.5)
-            end
-        end
-    end
-end)
+-- TELEPORT TAB FUNÇÕES
 
--- --------- FUNÇÕES TELEPORT ---------
-
--- Função genérica de teleport
 local function TeleportTo(position)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(position)
@@ -382,33 +441,28 @@ local function TeleportTo(position)
 end
 
 AddButton(TeleportTab, "Teleport Casa", function()
-    TeleportTo(Vector3.new(250, 4, 200)) -- ajuste a posição certa no seu mapa
+    TeleportTo(Vector3.new(250, 4, 200))
 end)
-
 AddButton(TeleportTab, "Teleport Hospital", function()
     TeleportTo(Vector3.new(150, 4, 150))
 end)
-
 AddButton(TeleportTab, "Teleport Escola", function()
     TeleportTo(Vector3.new(100, 4, 300))
 end)
-
 AddButton(TeleportTab, "Teleport Prisão", function()
     TeleportTo(Vector3.new(300, 4, 100))
 end)
-
 AddButton(TeleportTab, "Teleport Loja de Armas", function()
     TeleportTo(Vector3.new(350, 4, 250))
 end)
 
--- --------- FUNÇÕES VISUAIS ---------
+-- VISUAL TAB FUNÇÕES
 
 local espOn = false
 local espBoxes = {}
 
 AddToggleButton(VisualTab, "ESP Jogadores", function(state)
     espOn = state
-    -- Limpar esp atual
     for _, box in pairs(espBoxes) do
         box:Destroy()
     end
@@ -418,62 +472,43 @@ AddToggleButton(VisualTab, "ESP Jogadores", function(state)
         for _, plr in pairs(Players:GetPlayers()) do
             if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
                 local box = Instance.new("BillboardGui", plr.Character.Head)
-                box.Size = UDim2.new(0, 100, 0, 20)
+                box.Size = UDim2.new(0, 100, 0, 50)
+                box.Adornee = plr.Character.Head
                 box.AlwaysOnTop = true
-                box.Name = "THSCR1PTS_ESP"
 
-                local label = Instance.new("TextLabel", box)
-                label.Size = UDim2.new(1, 0, 1, 0)
-                label.BackgroundTransparency = 1
-                label.Text = plr.Name
-                label.TextColor3 = Color3.fromRGB(255, 0, 0)
-                label.TextScaled = true
-                label.Font = Enum.Font.GothamBold
-
+                local frame = Instance.new("Frame", box)
+                frame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+                frame.BorderColor3 = Color3.new(0, 0, 0)
+                frame.Size = UDim2.new(1, 0, 1, 0)
+                frame.BackgroundTransparency = 0.5
                 table.insert(espBoxes, box)
             end
         end
     end
 end)
 
-local whiteTheme = false
-AddToggleButton(VisualTab, "Tema Branco / Preto", function(state)
-    whiteTheme = state
-    if whiteTheme then
-        Main.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
-        Title.TextColor3 = Color3.new(0, 0, 0)
-        TabsFrame.BackgroundTransparency = 0
-        for _, tab in pairs(Tabs) do
-            tab.Button.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-            tab.Button.TextColor3 = Color3.new(0,0,0)
-            for _, btn in pairs(tab.Buttons) do
-                btn.BackgroundColor3 = Color3.fromRGB(230,230,230)
-                btn.TextColor3 = Color3.new(0,0,0)
-            end
-        end
-    else
-        Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
-        Title.TextColor3 = Color3.new(1,1,1)
-        TabsFrame.BackgroundTransparency = 1
-        for _, tab in pairs(Tabs) do
-            tab.Button.BackgroundColor3 = Color3.fromRGB(30,30,30)
-            tab.Button.TextColor3 = Color3.new(1,1,1)
-            for _, btn in pairs(tab.Buttons) do
-                btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-                btn.TextColor3 = Color3.new(1,1,1)
+AddToggleButton(VisualTab, "Wall Hack", function(state)
+    -- Wallhack básico: muda a transparência dos players para ver pelas paredes
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character then
+            for _, part in pairs(plr.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.LocalTransparencyModifier = state and 0.4 or 0
+                end
             end
         end
     end
 end)
 
--- Botão para fechar o menu pela aba visual
-AddButton(VisualTab, "Fechar Menu", function()
-    Main.Visible = false
+AddToggleButton(VisualTab, "Night Mode", function(state)
+    workspace.Lighting.ClockTime = state and 0 or 14
+    workspace.Lighting.Brightness = state and 1 or 2
 end)
 
--- Setar aba padrão ativa
+-- Aba inicial selecionada
+Tabs[1].Button.BackgroundColor3 = Color3.fromRGB(60,60,60)
+Tabs[1].Content.Visible = true
 SelectedTab = Tabs[1]
-SelectedTab.Content.Visible = true
-SelectedTab.Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 
-print("THSCR1PTS HUB carregado com sucesso!")
+print("THSCR1PTS HUB COMPLETO carregado!")
+
