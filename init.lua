@@ -1,16 +1,84 @@
--- THSCR1PTS HUB COMPLETO - GUI nativa estilo Rael Hub com funções ajustáveis e sujas (sem autofarm e fling)
+-- THSCR1PTS HUB COMPLETO - Aimbots variados + funções ajustáveis e sujas (sem autofarm e fling)
+-- Visual preto estilo Rael Hub, GUI nativa Roblox
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
--- Config padrões
+-- CONFIG PADRÃO
 local defaultSpeed = 16
 local defaultJump = 50
 local defaultGravity = workspace.Gravity
 local defaultSpinSpeed = 30
 local defaultKillRadius = 15
+
+-- Variáveis globais
+local currentSpeed = defaultSpeed
+local currentJump = defaultJump
+local currentGravity = defaultGravity
+local currentSpinSpeed = defaultSpinSpeed
+local currentKillRadius = defaultKillRadius
+
+-- Flags ON/OFF
+local speedOn = false
+local jumpOn = false
+local gravityOn = false
+local noclipOn = false
+local infJumpOn = false
+local antiRagdollOn = false
+local spinbotOn = false
+local killAuraOn = false
+local rageAimbotOn = false
+local silentAimOn = false
+local regularAimbotOn = false
+local triggerbotOn = false
+local espOn = false
+local wallhackOn = false
+local nightModeOn = false
+
+-- Helper functions
+local function getHumanoid()
+    if LocalPlayer.Character then
+        return LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    end
+    return nil
+end
+
+local function getClosestEnemy(maxDistance)
+    local closestDist = maxDistance or math.huge
+    local target = nil
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = LocalPlayer.Character.HumanoidRootPart.Position
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChildOfClass("Humanoid") and plr.Character.Humanoid.Health > 0 then
+                local dist = (plr.Character.HumanoidRootPart.Position - hrp).Magnitude
+                if dist < closestDist then
+                    closestDist = dist
+                    target = plr
+                end
+            end
+        end
+    end
+    return target
+end
+
+local function isVisible(target)
+    if not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then return false end
+    local origin = workspace.CurrentCamera.CFrame.Position
+    local direction = (target.Character.HumanoidRootPart.Position - origin).Unit * 500
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    local raycastResult = workspace:Raycast(origin, direction, raycastParams)
+    if raycastResult and raycastResult.Instance then
+        if raycastResult.Instance:IsDescendantOf(target.Character) then
+            return true
+        end
+    end
+    return false
+end
 
 -- Criar ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
@@ -19,7 +87,7 @@ ScreenGui.Parent = game:GetService("CoreGui")
 
 -- Botão abrir HUB
 local OpenBtn = Instance.new("TextButton", ScreenGui)
-OpenBtn.Size = UDim2.new(0, 140, 0, 35)
+OpenBtn.Size = UDim2.new(0, 160, 0, 40)
 OpenBtn.Position = UDim2.new(0, 15, 0, 15)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
 OpenBtn.TextColor3 = Color3.new(1,1,1)
@@ -31,8 +99,8 @@ OpenBtn.AutoButtonColor = false
 
 -- Frame principal
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 480, 0, 550)
-Main.Position = UDim2.new(0.5, -240, 0.5, -275)
+Main.Size = UDim2.new(0, 500, 0, 560)
+Main.Position = UDim2.new(0.5, -250, 0.5, -280)
 Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
 Main.BorderSizePixel = 0
 Main.Visible = false
@@ -70,7 +138,7 @@ end)
 
 -- Container abas
 local TabsFrame = Instance.new("Frame", Main)
-TabsFrame.Size = UDim2.new(1, -20, 0, 45)
+TabsFrame.Size = UDim2.new(1, -20, 0, 50)
 TabsFrame.Position = UDim2.new(0, 10, 0, 55)
 TabsFrame.BackgroundTransparency = 1
 
@@ -80,8 +148,8 @@ UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 10)
 
 local ContentFrame = Instance.new("Frame", Main)
-ContentFrame.Size = UDim2.new(1, -20, 1, -110)
-ContentFrame.Position = UDim2.new(0, 10, 0, 105)
+ContentFrame.Size = UDim2.new(1, -20, 1, -120)
+ContentFrame.Position = UDim2.new(0, 10, 0, 110)
 ContentFrame.BackgroundTransparency = 1
 ContentFrame.ClipsDescendants = true
 
@@ -236,17 +304,8 @@ local function AddSlider(tab, text, minVal, maxVal, defaultVal, callback)
     return container
 end
 
--- PLAYER TAB FUNÇÕES
+-- === PLAYER TAB FUNÇÕES === --
 
-local function getHumanoid()
-    if LocalPlayer.Character then
-        return LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    end
-    return nil
-end
-
-local currentSpeed = defaultSpeed
-local speedOn = false
 AddToggleButton(PlayerTab, "Speed Hack", function(state)
     speedOn = state
     local hum = getHumanoid()
@@ -263,8 +322,6 @@ AddSlider(PlayerTab, "Speed", 16, 300, defaultSpeed, function(val)
     end
 end)
 
-local currentJump = defaultJump
-local jumpOn = false
 AddToggleButton(PlayerTab, "Super Jump", function(state)
     jumpOn = state
     local hum = getHumanoid()
@@ -281,8 +338,6 @@ AddSlider(PlayerTab, "Jump Power", 50, 500, defaultJump, function(val)
     end
 end)
 
-local noclipOn = false
-local noclipConn = nil
 AddToggleButton(PlayerTab, "Noclip", function(state)
     noclipOn = state
     if noclipOn then
@@ -303,7 +358,10 @@ AddToggleButton(PlayerTab, "Noclip", function(state)
     end
 end)
 
-local infJumpOn = false
+AddToggleButton(PlayerTab, "Infinite Jump", function(state)
+    infJumpOn = state
+end)
+
 UserInputService.JumpRequest:Connect(function()
     if infJumpOn then
         local hum = getHumanoid()
@@ -312,12 +370,7 @@ UserInputService.JumpRequest:Connect(function()
         end
     end
 end)
-AddToggleButton(PlayerTab, "Infinite Jump", function(state)
-    infJumpOn = state
-end)
 
-local currentGravity = defaultGravity
-local gravityOn = false
 AddToggleButton(PlayerTab, "Gravity Toggle", function(state)
     gravityOn = state
     workspace.Gravity = gravityOn and currentGravity or defaultGravity
@@ -330,7 +383,6 @@ AddSlider(PlayerTab, "Gravity", 0, 500, defaultGravity, function(val)
     end
 end)
 
-local antiRagdollOn = false
 AddToggleButton(PlayerTab, "Anti Ragdoll", function(state)
     antiRagdollOn = state
     local hum = getHumanoid()
@@ -347,12 +399,9 @@ AddToggleButton(PlayerTab, "Anti Ragdoll", function(state)
     end
 end)
 
--- SUJO TAB FUNÇÕES
+-- === SUJO TAB FUNÇÕES === --
 
-local spinbotOn = false
 local spinConnection = nil
-local currentSpinSpeed = defaultSpinSpeed
-
 AddToggleButton(SujoTab, "Spinbot", function(state)
     spinbotOn = state
     if spinbotOn then
@@ -369,9 +418,6 @@ end)
 AddSlider(SujoTab, "Spinbot Speed", 10, 500, defaultSpinSpeed, function(val)
     currentSpinSpeed = val
 end)
-
-local killAuraOn = false
-local currentKillRadius = defaultKillRadius
 
 AddToggleButton(SujoTab, "Kill Aura", function(state)
     killAuraOn = state
@@ -397,33 +443,14 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Rage Aimbot básico
-local rageAimbotOn = false
+-- Rage Aimbot básico (gira personagem instantâneo)
 AddToggleButton(SujoTab, "Rage Aimbot", function(state)
     rageAimbotOn = state
 end)
 
-local function getClosestEnemy()
-    local closestDist = math.huge
-    local target = nil
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = LocalPlayer.Character.HumanoidRootPart.Position
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local dist = (plr.Character.HumanoidRootPart.Position - hrp).Magnitude
-                if dist < closestDist then
-                    closestDist = dist
-                    target = plr
-                end
-            end
-        end
-    end
-    return target
-end
-
 RunService.Heartbeat:Connect(function()
     if rageAimbotOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local target = getClosestEnemy()
+        local target = getClosestEnemy(300)
         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
             local hrp = LocalPlayer.Character.HumanoidRootPart
             local targetPos = target.Character.HumanoidRootPart.Position
@@ -432,83 +459,4 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- TELEPORT TAB FUNÇÕES
-
-local function TeleportTo(position)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(position)
-    end
-end
-
-AddButton(TeleportTab, "Teleport Casa", function()
-    TeleportTo(Vector3.new(250, 4, 200))
-end)
-AddButton(TeleportTab, "Teleport Hospital", function()
-    TeleportTo(Vector3.new(150, 4, 150))
-end)
-AddButton(TeleportTab, "Teleport Escola", function()
-    TeleportTo(Vector3.new(100, 4, 300))
-end)
-AddButton(TeleportTab, "Teleport Prisão", function()
-    TeleportTo(Vector3.new(300, 4, 100))
-end)
-AddButton(TeleportTab, "Teleport Loja de Armas", function()
-    TeleportTo(Vector3.new(350, 4, 250))
-end)
-
--- VISUAL TAB FUNÇÕES
-
-local espOn = false
-local espBoxes = {}
-
-AddToggleButton(VisualTab, "ESP Jogadores", function(state)
-    espOn = state
-    for _, box in pairs(espBoxes) do
-        box:Destroy()
-    end
-    espBoxes = {}
-
-    if espOn then
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
-                local box = Instance.new("BillboardGui", plr.Character.Head)
-                box.Size = UDim2.new(0, 100, 0, 50)
-                box.Adornee = plr.Character.Head
-                box.AlwaysOnTop = true
-
-                local frame = Instance.new("Frame", box)
-                frame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-                frame.BorderColor3 = Color3.new(0, 0, 0)
-                frame.Size = UDim2.new(1, 0, 1, 0)
-                frame.BackgroundTransparency = 0.5
-                table.insert(espBoxes, box)
-            end
-        end
-    end
-end)
-
-AddToggleButton(VisualTab, "Wall Hack", function(state)
-    -- Wallhack básico: muda a transparência dos players para ver pelas paredes
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            for _, part in pairs(plr.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.LocalTransparencyModifier = state and 0.4 or 0
-                end
-            end
-        end
-    end
-end)
-
-AddToggleButton(VisualTab, "Night Mode", function(state)
-    workspace.Lighting.ClockTime = state and 0 or 14
-    workspace.Lighting.Brightness = state and 1 or 2
-end)
-
--- Aba inicial selecionada
-Tabs[1].Button.BackgroundColor3 = Color3.fromRGB(60,60,60)
-Tabs[1].Content.Visible = true
-SelectedTab = Tabs[1]
-
-print("THSCR1PTS HUB COMPLETO carregado!")
-
+-- Silent Aim (manipula o mouse para mirar automaticamente - muito
