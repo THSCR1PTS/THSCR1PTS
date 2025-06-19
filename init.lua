@@ -1,40 +1,134 @@
--- THSCR1PTS HUB - super completo estilo Rael Hub (preto)
--- Criado por THSCR1PTS
+-- THSCR1PTS HUB para Xeno executor - GUI preta estilo Rael Hub
 
-local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source"))()
-local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 
-local Window = Rayfield:CreateWindow({
-    Name = "THSCR1PTS HUB",
-    LoadingTitle = "Carregando THSCR1PTS HUB...",
-    LoadingSubtitle = "Brookhaven Hub com funções reais",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "THSCR1PTS",
-        FileName = "Config"
-    },
-    Discord = { Enabled = false },
-    KeySystem = false
-})
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "THSCR1PTS_HUB"
+ScreenGui.Parent = game:GetService("CoreGui")
 
--- Função Teleporte
-local function teleportTo(pos)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(pos)
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 350, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.BorderSizePixel = 0
+MainFrame.Visible = false
+MainFrame.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Title.Text = "THSCR1PTS HUB - By THSCR1PTS"
+Title.TextColor3 = Color3.fromRGB(230, 230, 230)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = MainFrame
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 40, 0, 40)
+CloseButton.Position = UDim2.new(1, -45, 0, 5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.new(1,1,1)
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextScaled = true
+CloseButton.Parent = MainFrame
+
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+end)
+
+local OpenButton = Instance.new("TextButton")
+OpenButton.Size = UDim2.new(0, 120, 0, 40)
+OpenButton.Position = UDim2.new(0, 10, 0, 10)
+OpenButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+OpenButton.TextColor3 = Color3.fromRGB(230, 230, 230)
+OpenButton.Text = "Abrir HUB"
+OpenButton.Font = Enum.Font.GothamBold
+OpenButton.TextScaled = true
+OpenButton.Parent = ScreenGui
+
+OpenButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+end)
+
+-- Funções do Hub
+
+local plr = LocalPlayer
+
+-- Speed Hack toggle
+local speedEnabled = false
+local normalSpeed = 16
+
+local SpeedButton = Instance.new("TextButton")
+SpeedButton.Size = UDim2.new(0, 150, 0, 40)
+SpeedButton.Position = UDim2.new(0, 100, 0, 60)
+SpeedButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+SpeedButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedButton.Text = "Speed Hack: OFF"
+SpeedButton.Font = Enum.Font.Gotham
+SpeedButton.TextScaled = true
+SpeedButton.Parent = MainFrame
+
+SpeedButton.MouseButton1Click:Connect(function()
+    speedEnabled = not speedEnabled
+    if speedEnabled then
+        if plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
+            plr.Character.Humanoid.WalkSpeed = 100
+        end
+        SpeedButton.Text = "Speed Hack: ON"
+        SpeedButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    else
+        if plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
+            plr.Character.Humanoid.WalkSpeed = normalSpeed
+        end
+        SpeedButton.Text = "Speed Hack: OFF"
+        SpeedButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     end
-end
+end)
+
+-- Jump Boost toggle
+local jumpEnabled = false
+local normalJump = 50
+
+local JumpButton = Instance.new("TextButton")
+JumpButton.Size = UDim2.new(0, 150, 0, 40)
+JumpButton.Position = UDim2.new(0, 100, 0, 110)
+JumpButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+JumpButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+JumpButton.Text = "Jump Boost: OFF"
+JumpButton.Font = Enum.Font.Gotham
+JumpButton.TextScaled = true
+JumpButton.Parent = MainFrame
+
+JumpButton.MouseButton1Click:Connect(function()
+    jumpEnabled = not jumpEnabled
+    if jumpEnabled then
+        if plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
+            plr.Character.Humanoid.JumpPower = 150
+        end
+        JumpButton.Text = "Jump Boost: ON"
+        JumpButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    else
+        if plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
+            plr.Character.Humanoid.JumpPower = normalJump
+        end
+        JumpButton.Text = "Jump Boost: OFF"
+        JumpButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    end
+end)
 
 -- Noclip toggle
-local noclip = false
+local noclipEnabled = false
 local noclipConn
+
 local function setNoclip(state)
-    noclip = state
-    if noclip then
+    noclipEnabled = state
+    if noclipEnabled then
         noclipConn = RunService.Stepped:Connect(function()
-            if LocalPlayer.Character then
-                for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if plr.Character then
+                for _, part in pairs(plr.Character:GetDescendants()) do
                     if part:IsA("BasePart") then
                         part.CanCollide = false
                     end
@@ -49,270 +143,46 @@ local function setNoclip(state)
     end
 end
 
--- ESP tables
-local espBoxes = {}
-local espNames = {}
-local espLines = {}
+local NoclipButton = Instance.new("TextButton")
+NoclipButton.Size = UDim2.new(0, 150, 0, 40)
+NoclipButton.Position = UDim2.new(0, 100, 0, 160)
+NoclipButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+NoclipButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+NoclipButton.Text = "Noclip: OFF"
+NoclipButton.Font = Enum.Font.Gotham
+NoclipButton.TextScaled = true
+NoclipButton.Parent = MainFrame
 
-local function clearESP()
-    for _, box in pairs(espBoxes) do
-        box:Destroy()
-    end
-    for _, nameTag in pairs(espNames) do
-        nameTag:Destroy()
-    end
-    for _, line in pairs(espLines) do
-        line:Destroy()
-    end
-    espBoxes = {}
-    espNames = {}
-    espLines = {}
-end
-
-local function createESP()
-    clearESP()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Head") then
-            -- Box ESP
-            local box = Instance.new("BillboardGui", plr.Character.HumanoidRootPart)
-            box.Name = "THSCR1PTS_ESP_BOX"
-            box.Size = UDim2.new(4, 0, 6, 0)
-            box.AlwaysOnTop = true
-            local frame = Instance.new("Frame", box)
-            frame.BackgroundColor3 = Color3.new(1, 0, 0)
-            frame.BackgroundTransparency = 0.6
-            frame.Size = UDim2.new(1, 0, 1, 0)
-            frame.BorderSizePixel = 0
-            espBoxes[plr] = box
-
-            -- Name ESP
-            local nameGui = Instance.new("BillboardGui", plr.Character.Head)
-            nameGui.Name = "THSCR1PTS_ESP_NAME"
-            nameGui.Size = UDim2.new(4, 0, 2, 0)
-            nameGui.AlwaysOnTop = true
-            local txt = Instance.new("TextLabel", nameGui)
-            txt.Text = plr.Name
-            txt.TextColor3 = Color3.new(1, 0, 0)
-            txt.BackgroundTransparency = 1
-            txt.Size = UDim2.new(1, 0, 1, 0)
-            txt.TextScaled = true
-            espNames[plr] = nameGui
-
-            -- Line ESP
-            local line = Drawing.new("Line")
-            line.Color = Color3.new(1, 0, 0)
-            line.Thickness = 1
-            line.Transparency = 1
-            espLines[plr] = line
-        end
-    end
-end
-
-local espEnabled = false
-local espUpdateConnection
-
-local function updateESP()
-    if not espEnabled then return end
-    local camera = workspace.CurrentCamera
-    for plr, line in pairs(espLines) do
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local hrpPos, onScreen = camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
-            local lpHead = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
-            if lpHead then
-                local lpPos, lpOnScreen = camera:WorldToViewportPoint(lpHead.Position)
-                if onScreen and lpOnScreen then
-                    line.From = Vector2.new(lpPos.X, lpPos.Y)
-                    line.To = Vector2.new(hrpPos.X, hrpPos.Y)
-                    line.Visible = true
-                else
-                    line.Visible = false
-                end
-            end
-        else
-            line.Visible = false
-        end
-    end
-end
-
--- Aba Geral
-local TabGeral = Window:CreateTab("⚙️ Geral")
-
-TabGeral:CreateToggle({
-    Name = "Speed Hack",
-    CurrentValue = false,
-    Callback = function(v)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.WalkSpeed = v and 100 or 16
-        end
-    end
-})
-
-TabGeral:CreateToggle({
-    Name = "Jump Boost",
-    CurrentValue = false,
-    Callback = function(v)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.JumpPower = v and 150 or 50
-        end
-    end
-})
-
-TabGeral:CreateToggle({
-    Name = "Noclip",
-    CurrentValue = false,
-    Callback = function(v)
-        setNoclip(v)
-    end
-})
-
-TabGeral:CreateToggle({
-    Name = "Invisível",
-    CurrentValue = false,
-    Callback = function(v)
-        if LocalPlayer.Character then
-            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.Transparency = v and 1 or 0
-                end
-            end
-        end
-    end
-})
-
--- Aba Visual
-local TabVisual = Window:CreateTab("👁️ Visual")
-
-TabVisual:CreateToggle({
-    Name = "ESP (Caixas e Nomes)",
-    CurrentValue = false,
-    Callback = function(v)
-        espEnabled = v
-        if v then
-            createESP()
-            espUpdateConnection = RunService.RenderStepped:Connect(updateESP)
-        else
-            clearESP()
-            if espUpdateConnection then
-                espUpdateConnection:Disconnect()
-                espUpdateConnection = nil
-            end
-        end
-    end
-})
-
--- Aba Teleporte
-local TabTP = Window:CreateTab("🧭 Teleportes")
-
-TabTP:CreateDropdown({
-    Name = "Ir para:",
-    Options = {"Spawn", "Hospital", "School", "Bank", "Car Shop"},
-    CurrentOption = "Spawn",
-    Callback = function(op)
-        local locs = {
-            Spawn = Vector3.new(-33, 8, 120),
-            Hospital = Vector3.new(-250, 8, 158),
-            School = Vector3.new(170, 8, -50),
-            Bank = Vector3.new(-100, 8, 100),
-            ["Car Shop"] = Vector3.new(240, 8, 230)
-        }
-        teleportTo(locs[op])
-    end
-})
-
--- Aba Troll
-local TabTroll = Window:CreateTab("😈 Troll")
-
-TabTroll:CreateButton({
-    Name = "Fling All",
-    Callback = function()
-        for _,plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local bv = Instance.new("BodyVelocity")
-                bv.MaxForce = Vector3.new(1e5,1e5,1e5)
-                bv.Velocity = Vector3.new(9999,9999,9999)
-                bv.Parent = plr.Character.HumanoidRootPart
-                game.Debris:AddItem(bv, 0.3)
-            end
-        end
-    end
-})
-
-TabTroll:CreateButton({
-    Name = "Crash Server",
-    Callback = function()
-        for _,plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                for i=1,5 do
-                    local bv = Instance.new("BodyVelocity")
-                    bv.MaxForce = Vector3.new(1e6,1e6,1e6)
-                    bv.Velocity = Vector3.new(math.random(-1000,1000),math.random(-1000,1000),math.random(-1000,1000))
-                    bv.Parent = plr.Character.HumanoidRootPart
-                    game.Debris:AddItem(bv, 0.1)
-                end
-            end
-        end
-    end
-})
-
-TabTroll:CreateToggle({
-    Name = "Loop Dance",
-    CurrentValue = false,
-    Callback = function(v)
-        local char = LocalPlayer.Character
-        if not char then return end
-        local anim
-        if v then
-            anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://3189773368"
-            local track = char.Humanoid:LoadAnimation(anim)
-            track:Play()
-            track.Looped = true
-            TabTroll._loopDanceTrack = track
-        else
-            if TabTroll._loopDanceTrack then
-                TabTroll._loopDanceTrack:Stop()
-                TabTroll._loopDanceTrack = nil
-            end
-        end
-    end
-})
-
--- Aba Configurações
-local TabConfig = Window:CreateTab("⚙️ Configurações")
-
-TabConfig:CreateButton({
-    Name = "Fechar HUB",
-    Callback = function()
-        if noclipConn then noclipConn:Disconnect() end
-        if espUpdateConnection then espUpdateConnection:Disconnect() end
-        clearESP()
-        Window:Destroy()
-    end
-})
-
--- Tema toggle
-local isBlackTheme = true
-local function toggleTheme()
-    isBlackTheme = not isBlackTheme
-    if isBlackTheme then
-        Window:SetTheme({
-            MainBackground = Color3.fromRGB(20,20,20),
-            Accent = Color3.fromRGB(30,30,30),
-            Outline = Color3.fromRGB(40,40,40),
-            FontColor = Color3.fromRGB(230,230,230),
-        })
+NoclipButton.MouseButton1Click:Connect(function()
+    setNoclip(not noclipEnabled)
+    if noclipEnabled then
+        NoclipButton.Text = "Noclip: ON"
+        NoclipButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
     else
-        Window:SetTheme({
-            MainBackground = Color3.fromRGB(240,240,240),
-            Accent = Color3.fromRGB(255,255,255),
-            Outline = Color3.fromRGB(200,200,200),
-            FontColor = Color3.fromRGB(20,20,20),
-        })
+        NoclipButton.Text = "Noclip: OFF"
+        NoclipButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     end
-end
+end)
 
-TabConfig:CreateButton({
-    Name = "Alternar Tema Preto/Branco",
-    Callback = toggleTheme
-})
+-- Fechar botão para limpar tudo
+local CloseAllButton = Instance.new("TextButton")
+CloseAllButton.Size = UDim2.new(0, 150, 0, 40)
+CloseAllButton.Position = UDim2.new(0, 100, 0, 210)
+CloseAllButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseAllButton.TextColor3 = Color3.new(1, 1, 1)
+CloseAllButton.Text = "Fechar HUB"
+CloseAllButton.Font = Enum.Font.GothamBold
+CloseAllButton.TextScaled = true
+CloseAllButton.Parent = MainFrame
+
+CloseAllButton.MouseButton1Click:Connect(function()
+    -- Reset velocidade e pulo
+    if plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
+        plr.Character.Humanoid.WalkSpeed = normalSpeed
+        plr.Character.Humanoid.JumpPower = normalJump
+    end
+    -- Desliga noclip
+    setNoclip(false)
+    MainFrame.Visible = false
+end)
 
